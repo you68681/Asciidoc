@@ -1,0 +1,225 @@
+= CORE Rankings Project 
+Doc Writer Chao Lei <chao68681@gmail.com>
+v1.0, 2019-05-27
+:toc:
+:homepage: https://bitbucket.org/linpa/coreportal/src/master/
+
+*The core project starts with this document.*
+======================
+[preface]
+*Introduction*
+
+*The CORE Rankings project consists of several databases with ranking information regarding Computer Science conferences and journals, and several tools to support the collection and analysis of data for doing rankings. Code and documentation are stored in several bitbucket repositories, while deployed code currently runs on the CORE server at Mammoth Cloud (http://www.mammoth.com.au). This will be referred to simply as Server.*
+======================
+== [blue]#The CORE sub-projects# ==
+
+The CORE sub-projects are:
+--
+  * Conference Rankings DB: includes the DB and also software for web display and for management.
+  * Journal Rankings DB: includes the DB and software for web display and data management.
+  * Conference Change Submissions: web pages and tools to allow the user to make submissions for consideration, and software to manage those submissions and create a new ranking in the DB.
+  * Journal Change Submissions: conceptually similar to the conference but have not yet run a journal submission process.
+  * Where People Publish tool (WWP): a tool that allows input of a set of researcher names and provides either the conferences or the journals in which they publish, ordered by importance/popularity. Data is obtained from DBLP.
+  * Analysis Tools: Various tools to support analysis of collections of papers, such as a conference, a journal over some time period, etc. Some of these tools are used for assistance with input to WPP.
+  * Journal Metrics: a collection of scripts and instruction to produce an excel spreadsheet with a range of data from the Clarivate (JCR) and Elsevier (Scopus).
+--
+
+This document will explain each of the sub-project with information on what the software does, where in bitbucket the source code is located, how to set up a version on a laptop for development, where and how to deploy on the server, etc.
+
+Section ? give an overview of the 2 primary databases: core and survey. Section ? provides an overview of the bitbucket repositories and section ? provides an overview of the server
+
+
+== [blue]#Conferences Ranking# ==
+
+
+======================
+*Overview description*
+
+This application displays the results of queries from the CORE DB, providing information about the CORE ranking of conferences. It provides the user with a web interface that supports submitting a comment for each conference. The application consists of database, CSS, JavaScripts, HTML, and Django for presenting the web interface for users to post requests then process it. Meanwhile, Django uses many scripts for various processing tasks.
+======================
+
+=== [blue]#Django structure of conferences ranking# 
+
+Django structure process users' posted requests when they visit the conferences ranking website. Meanwhile, the compelling database API of Django allows it operates database effectively to response the users' requests. Table objects in the database are represented in code as python classes, whose attributes can be accessed easily like any Python class; Django automatically handles the SQL query and fetching of the data behind the scenes. It is an administrator which send the data in the database to the webpage for displaying. 
+
+Follow the path to find the source code:
+
+https://bitbucket.org/linpa/coreportal/src/master/Src/conferences/
+
+
+include::./Src/conferences/Django_structure.adoc[tag=snippet-Conference_Django_structure]
+
+TIP: This content will be merge to the readme under the conference. with ./Src/conferences/readme.md[tag=snippet-Conference_Django_structure]
+
+=== [blue]#Database structure# ===
+
+The database structure explains what tables we have in the conferences ranking component and their relations. These tables are designed in `models.py` represented in code as python classes in the Django structure part.
+
+include::./Src/conferences/database.adoc[tag=snippet-database]
+
+=== [blue]#Application functions and processes# ===
+==== 2.3.1 [blue]#Search conference in database# ====
+
+The principal function of the user perspective is to search conference through database and display results, via the web interface.
+
+include::./Src/conferences/application_functions.adoc[tag=snippet-search]
+
+==== 2.3.2 [blue]#Submit commnet for conference# ====
+
+Another function is the user can leave a comment for each conference.  Simultaneously, other users can also visualize these comments.
+
+include::./Src/conferences/application_functions.adoc[tag=snippet-submit_comment]
+
+==== 2.3.3 [blue]#Login and logout# ====
+
+It is achieved by using LinkedIn authentication. This includes view functions for logging in and out and callable function that returns the currently logged in user. Is required by the other apps as login/logout functionality is used across the whole site.
+
+include::./conference_ranking/application_functions.adoc[tag=snippet-login/logout]
+
+=== [blue]#Static files# ===
+
+Static files are served directly to the user, without being processed by Django. These include images, stylesheets, and client-side scripts (ie, Javascript).
+
+Follow the path to find the source code:
+
+https://bitbucket.org/linpa/coreportal/src/master/Src/conferences/static/conferences/
+
+include::./Src/conferences/static/static_files_and_HTML_templates.adoc[tag=snippet-static_files]
+
+
+=== [blue]#HTML templates# ===
+
+HTML templates are given to Django's rendering engine, along with context, obtained from the database, and static files to produce webpages which include home page, conference search page, conference details page, and submit comment page.
+
+Follow the path to find the source code:
+
+https://bitbucket.org/linpa/coreportal/src/master/Src/conferences/templates/conferences/
+
+include::./Src/conferences/templates:conferences/static_files_and_HTML_templates.adoc[tag=snippet-HTML_templates]
+
+
+== [blue]#Conferences Change Submissions# ==
+
+======================
+*Overview description*
+
+This application supplies an interface to users in which to present requests for modifications to conferences in the database and admins an interface to view these requests. It chiefly processes users' update conferences and append conferences demands. All periodic update decisions are produced by academic committees based on objective data requested.
+======================
+
+=== [blue]#Django structure of conference change submission# ===
+
+Django structure in the conference change submission section handle five kinds of request posted by users, add unranked conferences, add ranked conferences, update conferences rank, change conferences FoR code and review the rank request. The ModelForm class is applied to outline how to construct and interpret HTML forms for users to present their change demand details.
+
+Follow the path to find the source code:
+
+https://bitbucket.org/linpa/coreportal/src/master/Src/changes/
+
+include::./Src/conference_changes/Django_structure.adoc[tag=snippet-Django_structure]
+
+=== [blue]#Database structure# ===
+
+The database structure explains what tables we have in the conference change submission part and their relations. These tables are created in `models.py` represented in code as python classes in the Django structure part.
+
+include::./Src/conference_changes/database.adoc[tag=snippet-database]
+
+=== [blue]#Application functions and processes# ===
+
+==== 3.3.1 [blue]#Submit confernce change request# ====
+
+As an import capacity, it requires users to support enough justification to justify their change demands. All explicit statement and support document will be submitted as forms formate create by the Django form class and stored into our CORE database.
+
+include::./Src/conference_changes/application_functions.adoc[tag=snippet-conference_change]
+
+
+IMPORTANT: need words to talk about how these requests be handled.
+
+==== 3.3.2 [blue]#Generate conference report# ====
+
+The conference report is produced for each conference, which covers the base information and change or add conferences request. All evidence is scheduled to help academic committees make the decision.
+
+include::./Src/conference_changes/application_functions.adoc[tag=snippet-conference_report]
+
+
+==== 3.3.3 [blue]#Update conference# ====
+
+If information is unambiguous and/or the CORE exec is in full agreement, a change decision will be made by the academic committees. If this is not the case, the requested change may not be made, but the request and related evidence will be accessible as part of the list. It is intended that the record, historical information, claims, and justifications will all be available from a CORE maintained the website.
+
+
+include::./Src/conference_changes/application_functions.adoc[tag=snippet-update_conference]
+
+
+
+=== [blue]#Static files# ===
+
+Follow the path to find the source code:
+
+https://bitbucket.org/linpa/coreportal/src/master/Src/changes/static/changes/
+
+include::./Src/conference_changes/static:changes/static_files_HTML_templates.adoc[tag=snippet-static_files]
+
+
+=== [blue]#HTML templates# ===
+
+HTML templates established the bone of webpages include home page, comparator page, and review existing requests page. Moreover, HTML templates along with form class produce a series of forms for users to fill in their conference change requirements information.
+
+Follow the path to find the source code:
+
+https://bitbucket.org/linpa/coreportal/src/master/Src/changes/templates/changes/
+
+include::./Src/conference_changes/templates:changes/static_files_HTML_templates.adoc[tag=snippet-HTML_templates]
+
+
+== [blue]#Journal Ranking# ==
+======================
+[preface]
+*Introduction*
+
+*The main composition for journals ranking is similar with conferences ranking which demonstrates the consequences of queries from the CORE DB, rendering information about the CORE ranking of journals to users. They run with same Django structure, Database structure, application functions and processes, Static files, and HTML templates. The login and logout function and user tables are not in the journal ranking piece because all applications share them.*
+======================
+
+Follow the path to find the source code:
+
+https://bitbucket.org/linpa/coreportal/src/master/Src/journals/
+
+
+
+TIP: Why the journal ranking part doesn't have the FOR code table which exists in the conference ranking.
+
+
+
+
+== [blue]#Journals Change Submission# ==
+======================
+[preface]
+*Introduction*
+
+*The journals change submission follows the process of conferences change submission. While tables required here are a little different from the conference change submission. Because of tables divergence, some functions are removed, but some are attached. All these diversity will be discussed in the Django structure part and database structure part.*
+======================
+
+Follow the path to find the source code:
+https://bitbucket.org/linpa/coreportal/src/master/Src/journal_changes/
+
+
+=== [blue]#Django structure of journal change submission#
+
+Django structure in the journal change submission section handle three kinds of request posted by users, add unranked journals, add ranked journals, update journals rank. The missing tables include: JournalYear, Chair, NewJournalData, ReviewRankConference, ReviewRankExistingConference, and SummaryArgument. The added tables are WoSRank, EditorialBoard, and Editor.
+
+include::./Src/journal_changes/Django_structure.adoc[tag=snippet-Django_structure]
+
+
+=== [blue]#Database structure# ===
+
+The different tables cause the different database structure of journal change submission.The database structure explains what tables we have in the journal change submission part and their relations.
+
+
+
+
+
+
+
+
+
+
+
+
+
